@@ -31,7 +31,7 @@ const Footer: React.FC = () => {
             <div className="flex items-center">
               <BookOpen className="h-8 w-8 text-indigo-400 hover:text-indigo-300 transition-colors" />
               <span className="mx-2 text-2xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
-                زاكرلي
+                Zakerly
               </span>
             </div>
             <p className="text-gray-300 text-base leading-relaxed">
@@ -121,10 +121,11 @@ const Footer: React.FC = () => {
         <div className="mt-12 pt-8 border-t border-gray-800">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-gray-400 text-sm text-center md:text-start">
-              © {currentYear} زاكرلي. {t('footer.allRightsReserved')}
+           {t('footer.allRightsReserved')} لدي شركة MARYAM {currentYear} ©.
             </p>
             <p className="text-yellow-500 text-sm bg-yellow-500/10 px-3 py-1 rounded-full">
               {t('footer.developmentStatus', { date: '1/1/2026' })}
+              <br></br>
             </p>
             <div className="flex items-center gap-2 text-gray-400 text-sm">
               <span>{t('footer.madeWith')}</span>

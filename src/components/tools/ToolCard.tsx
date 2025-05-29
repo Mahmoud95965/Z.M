@@ -25,12 +25,11 @@ const ToolCard: React.FC<ToolCardProps> = ({ tool }) => {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 flex flex-col">
-      <div className="relative h-48 overflow-hidden">
+    <div className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 flex flex-col">      <div className="relative h-48 overflow-hidden bg-white dark:bg-gray-800">
         <img 
           src={tool.imageUrl} 
           alt={tool.name} 
-          className="w-full h-full object-cover transition-transform duration-300 hover:scale-105 dark:brightness-90"
+          className="w-full h-full object-contain p-4 transition-transform duration-300 hover:scale-105 dark:brightness-90"
         />
         {tool.isNew && (
           <span className="absolute top-2 left-2 bg-teal-500 dark:bg-teal-600 text-white text-xs font-bold uppercase py-1 px-2 rounded-full">

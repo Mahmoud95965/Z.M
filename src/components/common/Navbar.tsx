@@ -8,7 +8,7 @@ import {
   X,
   Moon,
   Sun,
-  LogIn
+  CircleUserRound
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
@@ -30,7 +30,7 @@ const Navbar: React.FC = () => {
         <div className="flex justify-between items-center h-16">
           <Link to="/" className="flex-shrink-0 flex items-center">
             <BookOpen className="h-8 w-8 text-indigo-600 dark:text-indigo-400 hover:scale-110 transition-transform" />
-            <span className="mx-3 text-xl font-bold text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">زاكرلي</span>
+            <span className="mx-3 text-xl font-bold text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Zakerly </span>
           </Link>
           
           {/* Desktop Navigation */}
@@ -81,10 +81,9 @@ const Navbar: React.FC = () => {
               <UserProfile />
             ) : (
               <Link 
-                to="/auth"
-                className="inline-flex items-center px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white text-sm font-medium rounded-lg transition-colors duration-200"
+                to="/auth"                className="inline-flex items-center px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white text-sm font-medium rounded-lg transition-colors duration-200"
               >
-                <LogIn className="ml-2 h-5 w-5" />
+                <CircleUserRound className="ml-2 h-5 w-5" />
                 ابدأ الآن
               </Link>
             )}
@@ -94,10 +93,10 @@ const Navbar: React.FC = () => {
           <div className="flex items-center gap-2 sm:hidden">
             {!user && (
               <Link 
-                to="/auth"
-                className="inline-flex items-center px-3 py-1.5 bg-teal-500 hover:bg-teal-600 text-white text-sm font-medium rounded-lg transition-colors duration-200"
+                to="/auth"                className="inline-flex items-center p-2 bg-teal-500 hover:bg-teal-600 text-white text-sm font-medium rounded-lg transition-colors duration-200"
+                aria-label="تسجيل الدخول"
               >
-                ابدأ الآن
+                <CircleUserRound className="h-5 w-5" />
               </Link>
             )}
             <button
