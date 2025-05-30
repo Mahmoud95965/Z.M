@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect, useContext } from 'react';
 import { 
   User, 
   signInWithPopup, 
@@ -8,11 +8,14 @@ import {
   sendPasswordResetEmail
 } from 'firebase/auth';
 import { auth, googleProvider } from '../config/firebase';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { db } from '../config/firebase';
 
 export interface AuthContextType {
   user: User | null;
   loading: boolean;
   error: string | null;
+  isAdmin: boolean;
   signInWithGoogle: () => Promise<void>;
   signInWithEmail: (email: string, password: string) => Promise<void>;
   signUpWithEmail: (email: string, password: string) => Promise<void>;
@@ -20,7 +23,17 @@ export interface AuthContextType {
   logout: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | null>(null);
+const AuthContext = createContext<AuthContextType>({
+  user: null,
+  loading: true,
+  error: null,
+  isAdmin: false,
+  signInWithGoogle: async () => {},
+  signInWithEmail: async () => {},
+  signUpWithEmail: async () => {},
+  resetPassword: async () => {},
+  logout: async () => {},
+});
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -34,6 +47,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -42,6 +56,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     return unsubscribe;
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      setUser(user);
+      setLoading(false);
+      if (user) {
+        // التحقق من كون المستخدم مسؤولاً
+        const userDoc = await getDoc(doc(db, 'admins', user.uid));
+        setIsAdmin(userDoc.exists());
+      } else {
+        setIsAdmin(false);
+      }
+    });
+
+    return () => unsubscribe();
   }, []);
 
   const signInWithGoogle = async () => {
@@ -55,12 +85,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       throw error;
     }
   };
-
   const signInWithEmail = async (email: string, password: string) => {
     try {
       setError(null);
       const result = await signInWithEmailAndPassword(auth, email, password);
       setUser(result.user);
+      
+      // التحقق من كون المستخدم هو المسؤول
+      if (email === 'mahmoud@gmail.com' && result.user) {
+        const adminDocRef = doc(db, 'admins', result.user.uid);
+        await setDoc(adminDocRef, {
+          role: 'admin',
+          email: email,
+          createdAt: new Date().toISOString()
+        });
+        setIsAdmin(true);
+      }
     } catch (error) {
       console.error('Email sign in error:', error);
       setError('حدث خطأ أثناء تسجيل الدخول');
@@ -100,9 +140,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setError('حدث خطأ أثناء تسجيل الخروج');
       throw error;
     }
-  };
-
-  const value = {
+  };  const value = {
     user,
     loading,
     error,
@@ -110,8 +148,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signInWithEmail,
     signUpWithEmail,
     resetPassword,
-    logout
-  };
+    logout,
+    isAdmin,  };
 
   return (
     <AuthContext.Provider value={value}>

@@ -12,9 +12,11 @@ import ContactPage from './pages/ContactPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import TermsPage from './pages/TermsPage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
+import AdminRoute from './components/auth/AdminRoute';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
 import { ToolsProvider } from './context/ToolsContext';
+import PendingToolsPage from './pages/PendingToolsPage';
 
 function App() {
   return (
@@ -55,6 +57,14 @@ function App() {
                     <AdminToolsReviewPage />
                   </ProtectedRoute>
                 } 
+              />
+              <Route
+                path="/pending-tools"
+                element={
+                  <AdminRoute>
+                    <PendingToolsPage />
+                  </AdminRoute>
+                }
               />
             </Routes>
           </Router>

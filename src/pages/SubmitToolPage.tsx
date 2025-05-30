@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import PageLayout from '../components/layout/PageLayout';
 import { categories, pricingOptions } from '../data/toolsData';
 import { Send, File, Link as LinkIcon } from 'lucide-react';
+import { collection, addDoc } from 'firebase/firestore';
+import { db } from '../config/firebase';
 
 const SubmitToolPage: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -32,7 +34,7 @@ const SubmitToolPage: React.FC = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Simple validation
@@ -44,14 +46,34 @@ const SubmitToolPage: React.FC = () => {
       return;
     }
 
-    // Simulate successful submission
-    setFormData(prev => ({
-      ...prev,
-      submissionStatus: 'success'
-    }));
-    
-    // In a real application, you would send the data to a server here
-    console.log('Submitted tool:', formData);
+    try {
+      const toolsRef = collection(db, 'tools');
+      await addDoc(toolsRef, {
+        name: formData.name,
+        description: formData.description,
+        category: formData.category,
+        url: formData.url,
+        pricing: formData.pricing,
+        tags: formData.tags.split(',').map(tag => tag.trim()),
+        submittedBy: formData.email,
+        submittedAt: new Date().toISOString(),
+        status: 'pending',
+        rating: 0,
+        reviewCount: 0,
+        votes: { helpful: [], notHelpful: [] }
+      });
+
+      setFormData(prev => ({
+        ...prev,
+        submissionStatus: 'success'
+      }));
+    } catch (error) {
+      console.error('Error submitting tool:', error);
+      setFormData(prev => ({
+        ...prev,
+        submissionStatus: 'error'
+      }));
+    }
   };
 
   if (formData.submissionStatus === 'success') {

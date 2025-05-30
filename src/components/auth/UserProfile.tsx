@@ -1,10 +1,10 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
 import { LogOut, User } from 'lucide-react';
 
 const UserProfile: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, isAdmin } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -35,31 +35,38 @@ const UserProfile: React.FC = () => {
           )}
         </div>
         <span className="text-gray-700 dark:text-gray-300 text-sm font-medium">
-          {user.displayName || 'المستخدم'}
+          {user.displayName || user.email || 'المستخدم'}
         </span>
       </button>
 
-      {/* Dropdown menu */}
-      <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200">        <div className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 border-b border-gray-100 dark:border-gray-700">
-          <p className="font-medium text-right">{user.displayName || 'المستخدم'}</p>
-          <p className="text-sm text-gray-500 dark:text-gray-400 truncate text-right" dir="ltr">
-            {user.email}
-          </p>
+      <div className="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+        <div className="py-1" role="menu" aria-orientation="vertical">
+          {isAdmin && (
+            <Link
+              to="/pending-tools"
+              className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+              role="menuitem"
+            >
+              صفحة المسؤول
+            </Link>
+          )}
+          <Link
+            to="/profile"
+            className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+            role="menuitem"
+          >
+            <User className="h-4 w-4 ml-2" />
+            الملف الشخصي
+          </Link>
+          <button
+            onClick={handleLogout}
+            className="flex w-full items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+            role="menuitem"
+          >
+            <LogOut className="h-4 w-4 ml-2" />
+            تسجيل الخروج
+          </button>
         </div>
-        <button
-          onClick={() => navigate('/profile')}
-          className="w-full text-right px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center justify-end"
-        >
-          <User className="ml-2 h-4 w-4" />
-          الملف الشخصي
-        </button>
-        <button
-          onClick={handleLogout}
-          className="w-full text-right px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center justify-end"
-        >
-          <LogOut className="ml-2 h-4 w-4" />
-          تسجيل الخروج
-        </button>
       </div>
     </div>
   );
