@@ -4,6 +4,9 @@ import { useAuth } from '../context/AuthContext';
 import PageLayout from '../components/layout/PageLayout';
 import { LogIn, UserPlus, Mail, Lock } from 'lucide-react';
 import GoogleIcon from '../components/icons/GoogleIcon';
+import MicrosoftIcon from '../components/icons/MicrosoftIcon';
+import { auth, microsoftProvider } from '../config/firebase';
+import { signInWithPopup } from 'firebase/auth';
 
 const AuthPage: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -45,6 +48,18 @@ const AuthPage: React.FC = () => {
       navigate('/');
     } catch (error) {
       console.error('Google sign in error:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleMicrosoftSignIn = async () => {
+    try {
+      setIsLoading(true);
+      await signInWithPopup(auth, microsoftProvider);
+      navigate('/');
+    } catch (error) {
+      console.error('Microsoft sign in error:', error);
     } finally {
       setIsLoading(false);
     }
@@ -174,8 +189,21 @@ const AuthPage: React.FC = () => {
                       onClick={handleGoogleSignIn}
                       disabled={isLoading}
                       className="w-full flex justify-center items-center py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >                      <GoogleIcon className="h-5 w-5 ml-2" />
+                    >
+                      <GoogleIcon className="h-5 w-5 ml-2" />
                       متابعة باستخدام Google
+                    </button>
+                  </div>
+
+                  <div className="mt-6">
+                    <button
+                      type="button"
+                      onClick={handleMicrosoftSignIn}
+                      disabled={isLoading}
+                      className="w-full flex justify-center items-center py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <MicrosoftIcon className="h-5 w-5 ml-2" />
+                      متابعة باستخدام Microsoft
                     </button>
                   </div>
                 </div>

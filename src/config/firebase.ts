@@ -1,6 +1,6 @@
 import { initializeApp, FirebaseApp } from 'firebase/app';
 import { getFirestore, Firestore } from 'firebase/firestore';
-import { getAuth, GoogleAuthProvider, Auth } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, Auth, OAuthProvider } from 'firebase/auth';
 
 // Firebase configuration object
 export const firebaseConfig = {
@@ -19,12 +19,14 @@ let app: FirebaseApp;
 let db: Firestore;
 let auth: Auth;
 let googleProvider: GoogleAuthProvider;
+let microsoftProvider: OAuthProvider;
 
 try {
   app = initializeApp(firebaseConfig);
   db = getFirestore(app);
   auth = getAuth(app);
   googleProvider = new GoogleAuthProvider();
+  microsoftProvider = new OAuthProvider('microsoft.com');
 
   // Configure Google provider with recommended settings
   googleProvider.setCustomParameters({
@@ -39,4 +41,4 @@ try {
 }
 
 // Export initialized instances
-export { app, db, auth, googleProvider };
+export { app, db, auth, googleProvider, microsoftProvider };
