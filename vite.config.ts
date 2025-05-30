@@ -7,4 +7,6 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
+  // تعيين المسار الأساسي بناءً على بيئة التشغيل
+  base: process.env.GITHUB_PAGES ? '/Zakerly/' : '/',
 });
