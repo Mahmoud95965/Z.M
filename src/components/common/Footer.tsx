@@ -30,7 +30,7 @@ const Footer: React.FC = () => {
           <div className="space-y-6">            <div className="flex items-center group">
               <BrainCircuit className="h-8 w-8 text-indigo-400 animate-pulse-slow transition-all duration-300 group-hover:scale-110 group-hover:text-indigo-300" />
               <span className="mx-2 text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-400 animate-fade-in transition-all duration-300 group-hover:bg-gradient-to-l">
-                Zakerly
+                Zaker
               </span>
             </div>
             <p className="text-gray-300 text-base leading-relaxed">
