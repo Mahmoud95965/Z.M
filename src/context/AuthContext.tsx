@@ -63,9 +63,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(user);
       setLoading(false);
       if (user) {
-        // التحقق من كون المستخدم مسؤولاً
-        const userDoc = await getDoc(doc(db, 'admins', user.uid));
-        setIsAdmin(userDoc.exists());
+        if (user.email === 'mahmoud@gmail.com') {
+          // Set as admin for mahmoud@gmail.com
+          const adminDocRef = doc(db, 'admins', user.uid);
+          await setDoc(adminDocRef, {
+            role: 'admin',
+            email: user.email,
+            createdAt: new Date().toISOString()
+          });
+          setIsAdmin(true);
+        } else {
+          setIsAdmin(false);
+        }
       } else {
         setIsAdmin(false);
       }

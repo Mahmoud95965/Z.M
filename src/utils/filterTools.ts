@@ -2,6 +2,11 @@ import { FilterOptions, Tool } from '../types';
 
 export const filterTools = (tools: Tool[], filterOptions: FilterOptions): Tool[] => {
   return tools.filter(tool => {
+    // Only show fully approved tools
+    if (tool.status !== undefined && tool.status !== 'approved') {
+      return false;
+    }
+
     // Filter by category
     if (filterOptions.category !== 'All' && tool.category !== filterOptions.category) {
       return false;

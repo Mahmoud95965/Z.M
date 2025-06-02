@@ -51,14 +51,14 @@ export default {
       transitionProperty: {
         'height': 'height',
         'spacing': 'margin, padding',
-      },
-      animation: {
+      },      animation: {
         'fade-in': 'fadeIn 0.5s ease-in-out',
         'slide-up': 'slideUp 0.5s ease-out',
         'typing': 'typing 4s steps(20) infinite',
         'blink-caret': 'blink-caret 0.75s step-end infinite',
         'number-slide': 'numberSlide 2s cubic-bezier(0.4, 0, 0.2, 1)',
         'pulse-fade': 'pulseFade 2s cubic-bezier(0.4, 0, 0.6, 1)',
+        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
       },
       keyframes: {
         fadeIn: {

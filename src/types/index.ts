@@ -1,3 +1,5 @@
+export type ToolStatus = 'pending' | 'approved' | 'rejected' | 'approved_pending';
+
 export interface Tool {
   id: string;
   name: string;
@@ -14,6 +16,12 @@ export interface Tool {
   isNew?: boolean;
   isFeatured?: boolean;
   isPopular?: boolean;
+  status?: ToolStatus;
+  submittedBy: string;
+  submittedAt?: string;
+  reviewedBy?: string;
+  reviewedAt?: string;
+  rejectionReason?: string;
   votes?: {
     helpful: string[]; // Array of user IDs
     notHelpful: string[]; // Array of user IDs

@@ -4,11 +4,19 @@ import { db } from '../config/firebase';
 import PageLayout from '../components/layout/PageLayout';
 import { Tool } from '../types';
 import { useAuth } from '../context/AuthContext';
-import { ThumbsUp, ThumbsDown } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, X, CheckCircle } from 'lucide-react';
+import { sendNotification } from '../services/notification.service';
 
 export const AdminToolsReviewPage: React.FC = () => {
   const [pendingTools, setPendingTools] = useState<Tool[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
+  const [selectedToolId, setSelectedToolId] = useState<string | null>(null);
+  const [showSuccessMessage, setShowSuccessMessage] = useState<{
+    type: 'approve' | 'reject';
+    toolName: string;
+  } | null>(null);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -32,20 +40,95 @@ export const AdminToolsReviewPage: React.FC = () => {
     fetchPendingTools();
   }, []);
 
-  const handleToolAction = async (toolId: string, action: 'approve' | 'reject') => {
+  const handleApprove = async (toolId: string) => {
     try {
+      const tool = pendingTools.find(t => t.id === toolId);
+      if (!tool || !user) return;
+
       const toolRef = doc(db, 'tools', toolId);
       await updateDoc(toolRef, {
-        status: action === 'approve' ? 'approved' : 'rejected',
-        reviewedBy: user?.email,
+        status: 'approved_pending',
+        reviewedBy: user.email,
         reviewedAt: new Date().toISOString()
       });
+
+      // Send notification with updated message
+      await sendNotification({
+        userId: tool.submittedBy,
+        type: 'tool_approved',
+        title: 'تم قبول أداتك!',
+        message: `تم قبول الأداة "${tool.name}" بنجاح! سيتم إضافتها إلى منصتنا قريباً. شكراً لمساهمتك القيمة!`,
+        toolName: tool.name,
+        toolId: tool.id
+      });
+      
+      // Show success message
+      setShowSuccessMessage({
+        type: 'approve',
+        toolName: tool.name
+      });
+
+      // Hide success message after 3 seconds
+      setTimeout(() => {
+        setShowSuccessMessage(null);
+      }, 3000);
       
       // Update local state
-      setPendingTools(current => current.filter(tool => tool.id !== toolId));
+      setPendingTools(current => current.filter(t => t.id !== toolId));
     } catch (error) {
-      console.error(`Error ${action}ing tool:`, error);
+      console.error('Error approving tool:', error);
     }
+  };
+
+  const handleReject = async () => {
+    if (!selectedToolId || !rejectReason.trim() || !user) {
+      return;
+    }
+
+    try {
+      const tool = pendingTools.find(t => t.id === selectedToolId);
+      if (!tool) return;
+
+      const toolRef = doc(db, 'tools', selectedToolId);
+      await updateDoc(toolRef, {
+        status: 'rejected',
+        reviewedBy: user.email,
+        reviewedAt: new Date().toISOString(),
+        rejectionReason: rejectReason
+      });      // Send notification
+      await sendNotification({
+        userId: tool.submittedBy,
+        type: 'tool_rejected',
+        title: 'تم رفض الأداة',
+        message: `عذراً، تم رفض الأداة "${tool.name}" لعدم توافقها مع شروط الاستخدام: ${rejectReason}`,
+        toolName: tool.name,
+        toolId: tool.id
+      });
+      
+      // Show success message
+      setShowSuccessMessage({
+        type: 'reject',
+        toolName: tool.name
+      });
+
+      // Hide success message after 3 seconds
+      setTimeout(() => {
+        setShowSuccessMessage(null);
+      }, 3000);
+      
+      // Update local state
+      setPendingTools(current => current.filter(tool => tool.id !== selectedToolId));
+      setShowRejectModal(false);
+      setRejectReason('');
+      setSelectedToolId(null);
+    } catch (error) {
+      console.error('Error rejecting tool:', error);
+    }
+  };
+
+  const openRejectModal = (toolId: string) => {
+    setSelectedToolId(toolId);
+    setShowRejectModal(true);
   };
 
   if (loading) {
@@ -61,6 +144,20 @@ export const AdminToolsReviewPage: React.FC = () => {
   return (
     <PageLayout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Success Message */}
+        {showSuccessMessage && (
+          <div className={`fixed top-4 left-1/2 transform -translate-x-1/2 z-50 rounded-lg shadow-lg px-6 py-3 flex items-center space-x-3 space-x-reverse ${
+            showSuccessMessage.type === 'approve' ? 'bg-green-500' : 'bg-red-500'
+          }`}>
+            <CheckCircle className="h-6 w-6 text-white" />
+            <p className="text-white font-medium">
+              {showSuccessMessage.type === 'approve'
+                ? `تمت الموافقة على "${showSuccessMessage.toolName}" بنجاح`
+                : `تم رفض "${showSuccessMessage.toolName}" بنجاح`}
+            </p>
+          </div>
+        )}
+
         <div className="text-center mb-12">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">مراجعة الأدوات المقترحة</h1>
           <p className="text-lg text-gray-600 dark:text-gray-300">
@@ -70,7 +167,7 @@ export const AdminToolsReviewPage: React.FC = () => {
           </p>
         </div>
 
-        <div className="grid gap-6">
+        <div className="space-y-6">
           {pendingTools.map((tool) => (
             <div 
               key={tool.id} 
@@ -91,16 +188,16 @@ export const AdminToolsReviewPage: React.FC = () => {
                   </div>
                 </div>
                 
-                <div className="flex items-center space-x-2 space-x-reverse mr-6">
+                <div className="flex flex-col space-y-2">
                   <button
-                    onClick={() => handleToolAction(tool.id, 'approve')}
+                    onClick={() => handleApprove(tool.id)}
                     className="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-md transition-colors"
                   >
                     <ThumbsUp className="ml-2 h-4 w-4" />
                     موافقة
                   </button>
                   <button
-                    onClick={() => handleToolAction(tool.id, 'reject')}
+                    onClick={() => openRejectModal(tool.id)}
                     className="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-md transition-colors"
                   >
                     <ThumbsDown className="ml-2 h-4 w-4" />
@@ -112,6 +209,63 @@ export const AdminToolsReviewPage: React.FC = () => {
           ))}
         </div>
       </div>
+
+      {/* Rejection Modal */}
+      {showRejectModal && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+            <div className="fixed inset-0 transition-opacity" aria-hidden="true">
+              <div className="absolute inset-0 bg-gray-500 dark:bg-gray-900 opacity-75"></div>
+            </div>
+
+            <div className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-right overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+              <div className="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div className="flex justify-between items-center mb-4">
+                  <button 
+                    onClick={() => {
+                      setShowRejectModal(false);
+                      setRejectReason('');
+                      setSelectedToolId(null);
+                    }}
+                    className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                  >
+                    <X className="h-6 w-6" />
+                  </button>
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">سبب الرفض</h3>
+                </div>
+                
+                <textarea
+                  value={rejectReason}
+                  onChange={(e) => setRejectReason(e.target.value)}
+                  className="w-full h-32 p-2 border rounded-md mb-4 text-right dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  placeholder="اكتب سبب رفض الأداة..."
+                  dir="rtl"
+                />
+                
+                <div className="flex justify-end space-x-2 space-x-reverse">
+                  <button
+                    onClick={handleReject}
+                    disabled={!rejectReason.trim()}
+                    className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    تأكيد الرفض
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowRejectModal(false);
+                      setRejectReason('');
+                      setSelectedToolId(null);
+                    }}
+                    className="px-4 py-2 bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600"
+                  >
+                    إلغاء
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </PageLayout>
   );
 };

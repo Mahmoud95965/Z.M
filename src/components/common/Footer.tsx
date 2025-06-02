@@ -2,12 +2,12 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { 
-  BookOpen, 
   Twitter, 
   Instagram, 
   Linkedin, 
   Github,
-  Heart
+  Heart,
+  BrainCircuit
 } from 'lucide-react';
 import NewsletterForm from './NewsletterForm';
 
@@ -27,10 +27,9 @@ const Footer: React.FC = () => {
       <div className="max-w-7xl mx-auto pt-12 pb-8 px-4 sm:px-6 lg:pt-16 lg:pb-12 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
           {/* Brand Section */}
-          <div className="space-y-6">
-            <div className="flex items-center">
-              <BookOpen className="h-8 w-8 text-indigo-400 hover:text-indigo-300 transition-colors" />
-              <span className="mx-2 text-2xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+          <div className="space-y-6">            <div className="flex items-center group">
+              <BrainCircuit className="h-8 w-8 text-indigo-400 animate-pulse-slow transition-all duration-300 group-hover:scale-110 group-hover:text-indigo-300" />
+              <span className="mx-2 text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-400 animate-fade-in transition-all duration-300 group-hover:bg-gradient-to-l">
                 Zakerly
               </span>
             </div>

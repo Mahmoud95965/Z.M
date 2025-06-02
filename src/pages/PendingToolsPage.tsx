@@ -4,8 +4,9 @@ import { db } from '../config/firebase';
 import { Tool } from '../types/tool';
 import PageLayout from '../components/layout/PageLayout';
 import { useAuth } from '../hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { ThumbsUp, ThumbsDown } from 'lucide-react';
+import { sendNotification } from '../services/notification.service';
 
 const PendingToolsPage: React.FC = () => {
   const [pendingTools, setPendingTools] = useState<Tool[]>([]);
@@ -37,19 +38,42 @@ const PendingToolsPage: React.FC = () => {
     return () => unsubscribe();
   }, [isAdmin, navigate]);
 
-  const handleToolAction = async (toolId: string, action: 'approve' | 'reject') => {
+  const handleToolAction = async (tool: Tool, action: 'approve' | 'reject') => {
     if (!user) return;
 
     try {
-      const toolRef = doc(db, 'tools', toolId);
+      const toolRef = doc(db, 'tools', tool.id);
       await updateDoc(toolRef, {
-        status: action === 'approve' ? 'approved' : 'rejected',
+        status: action === 'approve' ? 'approved_pending' : 'rejected',
         reviewedBy: user.email,
         reviewedAt: new Date().toISOString()
       });
       
-      // Update local state to remove the tool
-      setPendingTools(current => current.filter(tool => tool.id !== toolId));
+      // Send notification to the submitter
+      if (tool.submittedBy) {
+        if (action === 'approve') {
+          await sendNotification({
+            userId: tool.submittedBy,
+            type: 'tool_approved',
+            title: 'تم قبول أداتك!',
+            message: `تم قبول الأداة "${tool.name}" بنجاح! سيتم إضافتها إلى منصتنا قريباً. شكراً لمساهمتك القيمة!`,
+            toolName: tool.name,
+            toolId: tool.id
+          });
+        } else {
+          await sendNotification({
+            userId: tool.submittedBy,
+            type: 'tool_rejected',
+            title: 'تم رفض الأداة',
+            message: `عذراً، تم رفض الأداة "${tool.name}" لعدم توافقها مع <a href="/terms" class="text-indigo-600 hover:text-indigo-800">شروط الاستخدام</a>. يمكنك مراجعة الشروط وإعادة تقديم الأداة.`,
+            toolName: tool.name,
+            toolId: tool.id
+          });
+        }
+      }
+      
+      // Update local state
+      setPendingTools(current => current.filter(t => t.id !== tool.id));
     } catch (error) {
       console.error(`Error ${action}ing tool:`, error);
     }
@@ -88,14 +112,14 @@ const PendingToolsPage: React.FC = () => {
                   </span>
                   <div className="flex space-x-2">
                     <button
-                      onClick={() => handleToolAction(tool.id, 'reject')}
+                      onClick={() => handleToolAction(tool, 'reject')}
                       className="p-2 text-red-600 hover:bg-red-100 rounded-full transition-colors"
                       title="رفض"
                     >
                       <ThumbsDown className="w-5 h-5" />
                     </button>
                     <button
-                      onClick={() => handleToolAction(tool.id, 'approve')}
+                      onClick={() => handleToolAction(tool, 'approve')}
                       className="p-2 text-green-600 hover:bg-green-100 rounded-full transition-colors"
                       title="موافقة"
                     >

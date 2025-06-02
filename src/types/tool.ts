@@ -1,6 +1,6 @@
 export type ToolCategory = 'Writing' | 'Research' | 'Math' | 'Science' | 'Language Learning' | 'Productivity' | 'Studying' | 'Test Prep' | 'Teaching';
 export type ToolPricing = 'Free' | 'Freemium' | 'Paid' | 'Subscription';
-export type ToolStatus = 'pending' | 'approved' | 'rejected';
+export type ToolStatus = 'pending' | 'approved' | 'rejected' | 'approved_pending';
 
 export interface Tool {
   id: string;
@@ -17,10 +17,12 @@ export interface Tool {
   reviewCount: number;
   isNew?: boolean;
   status?: ToolStatus;
-  submittedBy?: string;
+  submittedBy: string;
   submittedAt?: string;
   reviewedBy?: string;
-  reviewedAt?: string;  votes?: {
+  reviewedAt?: string;
+  rejectionReason?: string;
+  votes?: {
     helpful: string[];
     notHelpful: string[];
   };

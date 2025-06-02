@@ -259,13 +259,14 @@ const ToolDetailPage: React.FC = () => {
       ) : tool ? (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden">
-            <div className="md:flex">
-              <div className="md:flex-shrink-0">
-                <div className="h-64 w-full md:w-96 md:h-full overflow-hidden">
+            <div className="flex flex-col md:flex-row">
+              <div className="w-full md:w-96 md:flex-shrink-0">
+                <div className="relative h-64 md:h-full">
                   <img
-                    className="h-full w-full object-cover dark:brightness-90"
+                    className="w-full h-full object-contain md:object-cover transition-transform duration-300 hover:scale-105 dark:brightness-90"
                     src={tool.imageUrl}
                     alt={tool.name}
+                    loading="lazy"
                   />
                 </div>
               </div>
@@ -297,7 +298,10 @@ const ToolDetailPage: React.FC = () => {
                 
                 <div className="mt-2 flex items-center justify-end">
                   <span className="mr-2 text-gray-600 dark:text-gray-400" dir="rtl">({tool.reviewCount} تقييم)</span>
-                  <div className="flex">{renderStars(tool.rating)}</div>
+                  <div className="flex items-center">
+                    {renderStars(tool.rating)}
+                    <span className="mr-2 text-gray-600 dark:text-gray-400">{tool.rating.toFixed(1)}</span>
+                  </div>
                 </div>
                 
                 <p className="mt-4 text-gray-600 dark:text-gray-300 text-lg text-right leading-relaxed" dir="rtl">{tool.description}</p>

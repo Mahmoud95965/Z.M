@@ -4,9 +4,10 @@ import { useTools } from '../hooks/useTools';
 import PageLayout from '../components/layout/PageLayout';
 import SavedTools from '../components/tools/SavedTools';
 import { updateProfile } from 'firebase/auth';
-import { User, Camera, Loader } from 'lucide-react';
+import { User, Camera, Loader, Bell } from 'lucide-react';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { auth } from '../config/firebase';
+import NotificationsList from '../components/notifications/NotificationsList';
 
 const ProfilePage: React.FC = () => {
   const { user } = useAuth();
@@ -174,6 +175,18 @@ const ProfilePage: React.FC = () => {
           ) : (
             <SavedTools tools={savedTools} />
           )}
+        </div>
+
+        <div className="mt-8">
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white flex items-center">
+                <Bell className="ml-2 h-5 w-5" />
+                الإشعارات
+              </h2>
+            </div>
+            <NotificationsList />
+          </div>
         </div>
       </div>
     </PageLayout>
