@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTools } from '../hooks/useTools';
+import { updateToolVote, updateToolSave } from '../services/tool-actions.service';
 import PageLayout from '../components/layout/PageLayout';
 import ToolsGrid from '../components/tools/ToolsGrid';
 import ShareToolModal from '../components/tools/ShareToolModal';
@@ -110,13 +111,12 @@ const ToolDetailPage: React.FC = () => {
 
     return () => unsubscribe();
   }, [id, tools, toolsLoading, updateRelatedTools, updateUserVote]);
-
-  const handleVote = async (vote: 'helpful' | 'not-helpful') => {
+  const handleVote = async (isHelpful: boolean) => {
     if (!user) {
       setVoteMessage('يجب تسجيل الدخول للتصويت');
       return;
     }
-    
+
     if (!tool?.id) {
       console.error('Cannot vote: Tool is not properly loaded');
       return;
@@ -126,39 +126,14 @@ const ToolDetailPage: React.FC = () => {
     setVoteMessage(null);
 
     try {
-      const toolRef = doc(db, 'tools', tool.id);
-      const votes = { ...(tool.votes || { helpful: [], notHelpful: [] }) };
-      let newRating = tool.rating || 0;
-
-      // Toggle vote in the selected category
-      if (vote === 'helpful') {
-        if (votes.helpful.includes(user.uid)) {
-          votes.helpful = votes.helpful.filter(id => id !== user.uid);
-          newRating = Math.max(0, newRating - 0.5);
-        } else {
-          votes.helpful.push(user.uid);
-          newRating = Math.min(5, newRating + 0.5);
-        }
-      } else {
-        if (votes.notHelpful.includes(user.uid)) {
-          votes.notHelpful = votes.notHelpful.filter(id => id !== user.uid);
-          newRating = Math.min(5, newRating + 0.25);
-        } else {
-          votes.notHelpful.push(user.uid);
-          newRating = Math.max(0, newRating - 0.25);
-        }
+      const result = await updateToolVote(tool.id, user.uid, isHelpful);
+      if (result.success) {
+        setVoteMessage('شكراً على ملاحظاتك! تم تحديث التقييم');
+        // Snapshot listener will update the UI automatically
       }
-
-      await updateDoc(toolRef, {
-        votes,
-        rating: newRating,
-        reviewCount: votes.helpful.length + votes.notHelpful.length
-      });
-
-      setVoteMessage('شكراً على ملاحظاتك! تم تحديث التقييم');
     } catch (error) {
       console.error('Error updating vote:', error);
-      setVoteMessage('حدث خطأ أثناء تحديث التصويت');
+      setVoteMessage(error instanceof Error ? error.message : 'حدث خطأ أثناء تحديث التصويت');
     } finally {
       setIsVoting(false);
     }
@@ -176,8 +151,7 @@ const ToolDetailPage: React.FC = () => {
       />
     ));
   };
-  
-  const handleSave = async () => {
+    const handleSave = async () => {
     if (!user) {
       setSaveMessage('يجب تسجيل الدخول لحفظ الأداة');
       return;
@@ -192,24 +166,14 @@ const ToolDetailPage: React.FC = () => {
     setSaveMessage(null);
 
     try {
-      const toolRef = doc(db, 'tools', tool.id);
-      const savedBy = [...(tool.savedBy || [])];
-      const isCurrentlySaved = savedBy.includes(user.uid);
-
-      if (isCurrentlySaved) {
-        // Remove from saved
-        const updatedSavedBy = savedBy.filter(id => id !== user.uid);
-        await updateDoc(toolRef, { savedBy: updatedSavedBy });
-        setSaveMessage('تم إزالة الأداة من المحفوظات');
-      } else {
-        // Add to saved
-        savedBy.push(user.uid);
-        await updateDoc(toolRef, { savedBy });
-        setSaveMessage('تم حفظ الأداة بنجاح');
+      const result = await updateToolSave(tool.id, user.uid);
+      if (result.success) {
+        setSaveMessage(result.isSaved ? 'تم حفظ الأداة بنجاح' : 'تم إزالة الأداة من المحفوظات');
+        // Snapshot listener will update the UI automatically
       }
     } catch (error) {
       console.error('Error updating save:', error);
-      setSaveMessage('حدث خطأ أثناء حفظ الأداة');
+      setSaveMessage(error instanceof Error ? error.message : 'حدث خطأ أثناء حفظ الأداة');
     } finally {
       setIsSaving(false);
     }
@@ -387,7 +351,7 @@ const ToolDetailPage: React.FC = () => {
                 <div className="space-y-4">
                   <div className="flex space-x-4 space-x-reverse">
                     <button
-                      onClick={() => handleVote('helpful')}
+                      onClick={() => handleVote(true)}
                       disabled={isVoting}
                       className={`inline-flex items-center px-4 py-2 border rounded-md shadow-sm text-sm font-medium transition-colors
                         ${userVote === 'helpful'
@@ -404,7 +368,7 @@ const ToolDetailPage: React.FC = () => {
                       )}
                     </button>
                     <button
-                      onClick={() => handleVote('not-helpful')}
+                      onClick={() => handleVote(false)}
                       disabled={isVoting}
                       className={`inline-flex items-center px-4 py-2 border rounded-md shadow-sm text-sm font-medium transition-colors
                         ${userVote === 'not-helpful'

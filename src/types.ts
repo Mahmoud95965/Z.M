@@ -1,23 +1,17 @@
-export type ToolStatus = 'pending' | 'approved' | 'rejected' | 'approved_pending';
+export type ToolCategory = 
+  | 'Writing'
+  | 'Research'
+  | 'Math'
+  | 'Science'
+  | 'Language Learning'
+  | 'Productivity'
+  | 'Studying'
+  | 'Test Prep'
+  | 'Teaching'
+  | 'Other';
 
-export interface Tool {
-  id: string;
-  name: string;
-  description: string;
-  category: string;
-  url: string;
-  pricing: string;
-  tags: string[];
-  submittedBy: string;
-  submittedAt: string;
-  status: ToolStatus;
-  reviewedBy?: string;
-  reviewedAt?: string;
-  rejectionReason?: string;
-  rating: number;
-  reviewCount: number;
-  votes: {
-    helpful: string[];
-    notHelpful: string[];
-  };
-}
+export type ToolPricing = 
+  | 'Free'
+  | 'Freemium'
+  | 'Paid'
+  | 'Subscription';

@@ -11,6 +11,7 @@ import FAQPage from './pages/FAQPage';
 import ContactPage from './pages/ContactPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import TermsPage from './pages/TermsPage';
+import FinalToolsPage from './pages/FinalToolsPage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import AdminRoute from './components/auth/AdminRoute';
 import { ThemeProvider } from './context/ThemeContext';
@@ -34,6 +35,8 @@ function App() {
               <Route path="/contact" element={<ContactPage />} />
               <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
               <Route path="/terms" element={<TermsPage />} />
+              
+              {/* Protected Routes */}
               <Route 
                 path="/profile" 
                 element={
@@ -48,18 +51,36 @@ function App() {
                   <ProtectedRoute>
                     <SubmitToolPage />
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="/admin/tools-review" 
+
+              {/* Admin Routes */}
+              <Route
+                path="/admin"
                 element={
-                  <ProtectedRoute>
+                  <AdminRoute>
                     <AdminToolsReviewPage />
-                  </ProtectedRoute>
-                } 
+                  </AdminRoute>
+                }
               />
               <Route
-                path="/pending-tools"
+                path="/admin/tools-review"
+                element={
+                  <AdminRoute>
+                    <AdminToolsReviewPage />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/final-tools"
+                element={
+                  <AdminRoute>
+                    <FinalToolsPage />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/pending"
                 element={
                   <AdminRoute>
                     <PendingToolsPage />

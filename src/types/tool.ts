@@ -1,4 +1,4 @@
-export type ToolCategory = 'Writing' | 'Research' | 'Math' | 'Science' | 'Language Learning' | 'Productivity' | 'Studying' | 'Test Prep' | 'Teaching';
+export type ToolCategory = 'Writing' | 'Research' | 'Math' | 'Science' | 'Language Learning' | 'Productivity' | 'Studying' | 'Test Prep' | 'Teaching' | 'Other';
 export type ToolPricing = 'Free' | 'Freemium' | 'Paid' | 'Subscription';
 export type ToolStatus = 'pending' | 'approved' | 'rejected' | 'approved_pending';
 
@@ -6,25 +6,32 @@ export interface Tool {
   id: string;
   name: string;
   description: string;
-  longDescription?: string;
+  longDescription: string;
   category: ToolCategory;
-  url: string;
-  imageUrl?: string;
-  pricing: ToolPricing;
   tags: string[];
+  url: string;
+  imageUrl: string;
+  pricing: ToolPricing;
   features: string[];
   rating: number;
   reviewCount: number;
-  isNew?: boolean;
+  isNew: boolean;
+  isFeatured: boolean;
+  isPopular: boolean;
   status?: ToolStatus;
-  submittedBy: string;
+  submittedBy?: string;
   submittedAt?: string;
   reviewedBy?: string;
   reviewedAt?: string;
   rejectionReason?: string;
-  votes?: {
-    helpful: string[];
-    notHelpful: string[];
+  votes: {
+    helpful: string[]; // Array of user IDs
+    notHelpful: string[]; // Array of user IDs
   };
-  savedBy?: string[]; // Array of user IDs who saved this tool
+  votingStats: {
+    helpfulCount: number;
+    notHelpfulCount: number;
+    totalVotes: number;
+  };
+  savedBy: string[]; // Array of user IDs who saved this tool
 }

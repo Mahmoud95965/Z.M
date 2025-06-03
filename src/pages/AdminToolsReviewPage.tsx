@@ -4,8 +4,9 @@ import { db } from '../config/firebase';
 import PageLayout from '../components/layout/PageLayout';
 import { Tool } from '../types';
 import { useAuth } from '../context/AuthContext';
-import { ThumbsUp, ThumbsDown, X, CheckCircle } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, X } from 'lucide-react';
 import { sendNotification } from '../services/notification.service';
+import { Link } from 'react-router-dom';
 
 export const AdminToolsReviewPage: React.FC = () => {
   const [pendingTools, setPendingTools] = useState<Tool[]>([]);
@@ -143,70 +144,86 @@ export const AdminToolsReviewPage: React.FC = () => {
 
   return (
     <PageLayout>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Admin Navigation */}
+        <div className="mb-8 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">لوحة تحكم المسؤول</h2>
+          <div className="flex flex-wrap gap-4">
+            <Link
+              to="/admin/tools-review"
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 transition-colors duration-200"
+            >
+              مراجعة الأدوات
+            </Link>
+            <Link
+              to="/admin/final-tools"
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 transition-colors duration-200"
+            >
+              الأدوات النهائية
+            </Link>
+          </div>
+        </div>
+
         {/* Success Message */}
         {showSuccessMessage && (
-          <div className={`fixed top-4 left-1/2 transform -translate-x-1/2 z-50 rounded-lg shadow-lg px-6 py-3 flex items-center space-x-3 space-x-reverse ${
-            showSuccessMessage.type === 'approve' ? 'bg-green-500' : 'bg-red-500'
-          }`}>
-            <CheckCircle className="h-6 w-6 text-white" />
-            <p className="text-white font-medium">
+          <div className="mb-4 p-4 rounded-md bg-green-50 dark:bg-green-900">
+            <p className="text-green-800 dark:text-green-200">
               {showSuccessMessage.type === 'approve'
-                ? `تمت الموافقة على "${showSuccessMessage.toolName}" بنجاح`
-                : `تم رفض "${showSuccessMessage.toolName}" بنجاح`}
+                ? `تم قبول "${showSuccessMessage.toolName}" بنجاح!`
+                : `تم رفض "${showSuccessMessage.toolName}".`}
             </p>
           </div>
         )}
 
-        <div className="text-center mb-12">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">مراجعة الأدوات المقترحة</h1>
-          <p className="text-lg text-gray-600 dark:text-gray-300">
-            {pendingTools.length === 0 
-              ? 'لا توجد أدوات في انتظار المراجعة' 
-              : `${pendingTools.length} أدوات في انتظار المراجعة`}
-          </p>
-        </div>
+        {/* Main Content */}
+        <div className="bg-white dark:bg-gray-800 shadow rounded-lg">
+          <div className="px-4 py-5 sm:p-6">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+              الأدوات قيد المراجعة
+            </h3>
 
-        <div className="space-y-6">
-          {pendingTools.map((tool) => (
-            <div 
-              key={tool.id} 
-              className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6"
-            >
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 text-right">
-                    {tool.name}
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-300 mb-4 text-right">
-                    {tool.description}
-                  </p>
-                  <div className="text-sm text-gray-500 dark:text-gray-400 space-y-1 text-right">
-                    <p>التصنيف: {tool.category}</p>
-                    <p>الرابط: <a href={tool.url} target="_blank" rel="noopener noreferrer" className="text-indigo-600 dark:text-indigo-400 hover:underline" dir="ltr">{tool.url}</a></p>
-                    <p>مقترح بواسطة: <span dir="ltr">{tool.submittedBy}</span></p>
+            <div className="space-y-6">
+              {pendingTools.map((tool) => (
+                <div 
+                  key={tool.id} 
+                  className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 text-right">
+                        {tool.name}
+                      </h3>
+                      <p className="text-gray-600 dark:text-gray-300 mb-4 text-right">
+                        {tool.description}
+                      </p>
+                      <div className="text-sm text-gray-500 dark:text-gray-400 space-y-1 text-right">
+                        <p>التصنيف: {tool.category}</p>
+                        <p>الرابط: <a href={tool.url} target="_blank" rel="noopener noreferrer" className="text-indigo-600 dark:text-indigo-400 hover:underline" dir="ltr">{tool.url}</a></p>
+                        <p>مقترح بواسطة: <span dir="ltr">{tool.submittedBy}</span></p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex flex-col space-y-2">
+                      <button
+                        onClick={() => handleApprove(tool.id)}
+                        className="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-md transition-colors"
+                      >
+                        <ThumbsUp className="ml-2 h-4 w-4" />
+                        موافقة
+                      </button>
+                      <button
+                        onClick={() => openRejectModal(tool.id)}
+                        className="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-md transition-colors"
+                      >
+                        <ThumbsDown className="ml-2 h-4 w-4" />
+                        رفض
+                      </button>
+                    </div>
                   </div>
                 </div>
-                
-                <div className="flex flex-col space-y-2">
-                  <button
-                    onClick={() => handleApprove(tool.id)}
-                    className="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-md transition-colors"
-                  >
-                    <ThumbsUp className="ml-2 h-4 w-4" />
-                    موافقة
-                  </button>
-                  <button
-                    onClick={() => openRejectModal(tool.id)}
-                    className="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-md transition-colors"
-                  >
-                    <ThumbsDown className="ml-2 h-4 w-4" />
-                    رفض
-                  </button>
-                </div>
-              </div>
+              ))}
             </div>
-          ))}
+          </div>
         </div>
       </div>
 

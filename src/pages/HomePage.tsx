@@ -6,13 +6,32 @@ import FeaturedTools from '../components/home/FeaturedTools';
 import CategorySection from '../components/home/CategorySection';
 import Testimonials from '../components/home/Testimonials';
 import CallToAction from '../components/home/CallToAction';
-import { getFeaturedTools, getPopularTools, getNewTools } from '../data/toolsData';
+import { useTools } from '../hooks/useTools';
+import { Loader } from 'lucide-react';
 
 const HomePage: React.FC = () => {
   const { t } = useTranslation();
-  const featuredTools = getFeaturedTools();
-  const popularTools = getPopularTools().slice(0, 4);
-  const newTools = getNewTools().slice(0, 4);
+  const { tools, isLoading, error, featuredTools, popularTools, newTools } = useTools();
+
+  if (isLoading) {
+    return (
+      <PageLayout>
+        <div className="flex justify-center items-center min-h-[60vh]">
+          <Loader className="w-8 h-8 animate-spin text-indigo-600 dark:text-indigo-400" />
+        </div>
+      </PageLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <PageLayout>
+        <div className="text-center py-12">
+          <p className="text-red-600 dark:text-red-400">{error}</p>
+        </div>
+      </PageLayout>
+    );
+  }
 
   return (
     <PageLayout>
@@ -31,7 +50,7 @@ const HomePage: React.FC = () => {
         <FeaturedTools 
           title={t('common.popular')}
           subtitle={t('home.popularToolsSubtitle')}
-          tools={popularTools}
+          tools={popularTools.slice(0, 4)}
           viewAllLink="/tools?sort=popular"
           className="bg-transparent"
         />
@@ -40,7 +59,7 @@ const HomePage: React.FC = () => {
       <FeaturedTools 
         title={t('common.new')}
         subtitle={t('home.newToolsSubtitle')}
-        tools={newTools}
+        tools={newTools.slice(0, 4)}
         viewAllLink="/tools?sort=new"
       />
       
