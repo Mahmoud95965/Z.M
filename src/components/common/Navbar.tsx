@@ -61,7 +61,7 @@ const Navbar: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">          <Link to="/" className="flex-shrink-0 flex items-center group">
             <BrainCircuit className="h-8 w-8 text-indigo-600 dark:text-indigo-400 animate-pulse-slow transition-all duration-300 group-hover:scale-110" />
-            <span className="mx-3 text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 animate-fade-in transition-all duration-300 group-hover:bg-gradient-to-l">Zaker</span>
+            <span className="mx-3 text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 animate-fade-in transition-all duration-300 group-hover:bg-gradient-to-l">Zakér</span>
           </Link>
           
           {/* Desktop Navigation */}
